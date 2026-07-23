@@ -4,9 +4,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Video Yêu Thích của ${user.fullname} - PolyOE</title>
+    <title>Thống kê chia sẻ Video - PolyOE</title>
     <style>
-        /* Tái sử dụng hệ thống biến màu sắc để đồng bộ toàn project */
+        /* Tái sử dụng hệ thống biến màu sắc để đồng bộ giao diện */
         :root {
             --primary: #4F46E5;
             --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
@@ -34,11 +34,11 @@
             color: var(--text-main);
         }
 
-        /* Khung chứa nội dung */
+        /* Khung chứa nội dung chính */
         .container {
             background-color: var(--card-bg);
             width: 100%;
-            max-width: 600px;
+            max-width: 900px; /* Mở rộng một chút vì bảng này có 4 cột */
             padding: 40px;
             border-radius: 24px;
             box-shadow: var(--shadow-lg);
@@ -52,68 +52,63 @@
             background: linear-gradient(to right, #4F46E5, #EC4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            margin-bottom: 30px;
             font-size: 26px;
             font-weight: 800;
+            text-transform: uppercase;
         }
 
-        /* Dòng phụ đề */
-        .subtitle {
-            text-align: center;
+        /* Lớp bọc bảng để tạo viền và bo góc mượt mà */
+        .table-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        /* Định dạng Header bảng */
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Hiệu ứng khi hover vào từng hàng */
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f0fdf4; /* Đổi màu hover sang ánh xanh lá nhẹ cho khác biệt một chút */
+        }
+
+        td {
+            color: var(--text-main);
             font-size: 15px;
         }
 
-        /* Danh sách video */
-        .video-list {
-            list-style-type: none;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-
-        /* Từng item video dạng card */
-        .video-item {
-            display: flex;
-            align-items: center;
-            padding: 16px 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        .video-item:hover {
-            border-color: var(--primary);
-            transform: translateX(6px); /* Hiệu ứng trượt sang phải khi hover */
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.15);
-        }
-
-        .video-icon {
-            color: #10b981; /* Màu xanh lá cho dấu tick */
-            margin-right: 12px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        /* Trạng thái trống (chưa có video) */
-        .empty-state {
+        /* Căn giữa cho cột "Số lượt chia sẻ" */
+        td:nth-child(2), th:nth-child(2) {
             text-align: center;
-            padding: 30px 20px;
-            background-color: #f8fafc;
-            border-radius: 12px;
-            border: 2px dashed #cbd5e1;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            font-style: italic;
         }
 
-        /* Nút Quay lại */
+        /* Định dạng nút bấm Quay lại */
         .back-btn-container {
             text-align: center;
         }
@@ -148,24 +143,33 @@
 </head>
 <body>
     <div class="container">
-        <h2>${user.fullname != null ? user.fullname : 'Người dùng không tồn tại'}</h2>
+        <h2>Bài 4: Thống kê lượt chia sẻ Video</h2>
         
-        <c:if test="${not empty user.favorites}">
-            <p class="subtitle">Danh sách các video đã yêu thích:</p>
-            <ul class="video-list">
-                <c:forEach var="favorite" items="${user.favorites}">
-                    <li class="video-item">
-                        <span class="video-icon">&#10003;</span> ${favorite.video.title}
-                    </li>
-                </c:forEach>
-            </ul>
-        </c:if>
-        
-        <c:if test="${empty user.favorites}">
-            <div class="empty-state">
-                <p>Chưa có video yêu thích nào trong danh sách.</p>
-            </div>
-        </c:if>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tiêu đề video</th>
+                        <th>Số lượt chia sẻ</th>
+                        <th>Ngày chia sẻ đầu tiên</th>
+                        <th>Ngày chia sẻ cuối cùng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="report" items="${reports}">
+                        <tr>
+                            <td>${report.videoTitle}</td>
+                            <td>
+                                <!-- Bạn có thể thêm class badge ở đây nếu muốn số nổi bật hơn -->
+                                <strong>${report.shareCount}</strong>
+                            </td>
+                            <td>${report.firstShareDate}</td>
+                            <td>${report.lastShareDate}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
 
         <div class="back-btn-container">
             <a href="${pageContext.request.contextPath}/" class="back-btn">

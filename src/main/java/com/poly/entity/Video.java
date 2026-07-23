@@ -25,7 +25,7 @@ public class Video {
     @Column(name = "Active")
     private Boolean active;
 
-    @OneToMany(mappedBy = "video")
+    @OneToMany(mappedBy = "video", fetch = FetchType.EAGER)
     private List<Favorite> favorites;
 
     @OneToMany(mappedBy = "video")
