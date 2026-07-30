@@ -170,39 +170,58 @@
 </head>
 <body>
     
-    <!-- THANH THÔNG BÁO -->
+    <!-- THANH THÔNG BÁO & ĐĂNG NHẬP -->
     <div class="header-bar">
         <span>
             <c:choose>
                 <c:when test="${not empty sessionScope.user}">
-                    Xin chào: <strong>${sessionScope.user.fullname}</strong>
-                    <!-- Nút đăng xuất hiển thị khi đã đăng nhập -->
-                    <a href="${pageContext.request.contextPath}/logout" class="logout-btn">Đăng xuất</a>
+                    Xin chào: <strong>${sessionScope.user.fullname}</strong> 
+                    <c:if test="${sessionScope.user.admin}">
+                        <span style="color: red; font-weight: bold;">[ADMIN]</span>
+                    </c:if>
+                    <a href="${pageContext.request.contextPath}/logout" class="btn btn-logout">Đăng xuất</a>
                 </c:when>
                 <c:otherwise>
                     <i>Bạn chưa đăng nhập</i> 
-                    <!-- Nút đăng nhập hiển thị khi chưa đăng nhập -->
-                    <a href="${pageContext.request.contextPath}/login" class="login-btn" style="margin-left: 10px;">Đăng nhập</a>
+                    <a href="${pageContext.request.contextPath}/login" class="btn btn-login">Đăng nhập</a>
                 </c:otherwise>
             </c:choose>
         </span>
-        <span>
-            Lượt truy cập hệ thống: <strong>${applicationScope.visitors != null ? applicationScope.visitors : 0}</strong>
-        </span>
+        <span>Lượt truy cập: <strong>${applicationScope.visitors != null ? applicationScope.visitors : 0}</strong></span>
     </div>
 
-    <h2>PolyOE - Hệ thống Quản lý Video Online</h2>
+    <h2>Hệ thống Quản lý Video - PolyOE</h2>
     
     <div class="menu">
-        <!-- CÁC CHỨC NĂNG CỦA LAB 3 -->
-        <h3>LAB 3: Khai thác thực thể kết hợp</h3>
-        <a href="${pageContext.request.contextPath}/user-favorites">&#128279; Bài 3: Xem Video Yêu Thích Của Nguyễn Văn Tèo</a>
-        <a href="${pageContext.request.contextPath}/all-favorites">&#128279; Bài 4: Danh Sách Tất Cả Video Được Yêu Thích</a>
-        
-        <!-- CÁC CHỨC NĂNG CỦA LAB 4 -->
-        <h3>LAB 4: Câu lệnh JPQL</h3>
-        <a href="${pageContext.request.contextPath}/video-search">&#128269; Bài 3: Tìm kiếm Video theo từ khóa</a>
-        <a href="${pageContext.request.contextPath}/share-report">&#128202; Bài 4: Thống kê lượt chia sẻ Video</a>
+        <!-- MENU 1: CHỨC NĂNG CÔNG KHAI (Ai cũng xem được) -->
+        <div class="menu-section public-menu">
+            <h3>&#127760; CHỨC NĂNG CÔNG KHAI</h3>
+            <a href="${pageContext.request.contextPath}/video/list">Danh sách Video</a>
+            <a href="${pageContext.request.contextPath}/video-search">Tìm kiếm Video theo từ khóa</a>
+        </div>
+
+        <!-- MENU 2: CHỨC NĂNG NGƯỜI DÙNG (Chỉ hiện khi đã đăng nhập) -->
+        <c:if test="${not empty sessionScope.user}">
+            <div class="menu-section user-menu">
+                <h3>&#128100; CHỨC NĂNG CÁ NHÂN (USER)</h3>
+                <a href="${pageContext.request.contextPath}/account/edit-profile">Cập nhật hồ sơ cá nhân</a>
+                <a href="${pageContext.request.contextPath}/account/change-password">Đổi mật khẩu</a>
+                <a href="${pageContext.request.contextPath}/user-favorites">Xem Video yêu thích của tôi</a>
+            </div>
+        </c:if>
+
+        <!-- MENU 3: CHỨC NĂNG QUẢN TRỊ (Chỉ hiện khi đã đăng nhập VÀ là Admin) -->
+        <!-- Logic: sessionScope.user.admin tương đương với việc gọi hàm getAdmin() trả về true/false -->
+        <c:if test="${not empty sessionScope.user and sessionScope.user.admin}">
+            <div class="menu-section admin-menu">
+                <h3>&#9881;&#65039; CHỨC NĂNG QUẢN TRỊ (ADMIN)</h3>
+                <a href="${pageContext.request.contextPath}/admin/video">Quản lý Video</a>
+                <a href="${pageContext.request.contextPath}/admin/user">Quản lý Người dùng</a>
+                <a href="${pageContext.request.contextPath}/all-favorites">Thống kê tất cả lượt thích</a>
+                <a href="${pageContext.request.contextPath}/share-report">Báo cáo lượt chia sẻ Video</a>
+            </div>
+        </c:if>
     </div>
+
 </body>
 </html>
