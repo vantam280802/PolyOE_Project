@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>Employee Management - REST Consumer</title>
+    <style>
+        /* Tái sử dụng hệ thống biến màu sắc đồng bộ */
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --info: #0ea5e9;
+            --info-hover: #0284c7;
+            --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--text-main);
+        }
+
+        /* Khung chứa chính */
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Tiêu đề */
+        h2 {
+            text-align: center;
+            background: linear-gradient(to right, #4F46E5, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        /* Lưới Form nhập liệu */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+            background-color: #f8fafc;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        /* Xử lý Radio Button Giới tính */
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            height: 100%;
+            padding-top: 5px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        /* Cụm nút chức năng */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-create { background-color: var(--success); }
+        .btn-create:hover { background-color: var(--success-hover); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2); }
+        
+        .btn-update { background-color: var(--info); }
+        .btn-update:hover { background-color: var(--info-hover); box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.2); }
+        
+        .btn-delete { background-color: var(--danger); }
+        .btn-delete:hover { background-color: var(--danger-hover); box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2); }
+        
+        .btn-reset { background-color: #64748b; }
+        .btn-reset:hover { background-color: #475569; box-shadow: 0 10px 15px -3px rgba(100, 116, 139, 0.2); }
+
+        /* Bảng dữ liệu */
+        .table-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e5e7eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        td {
+            color: var(--text-main);
+            font-size: 15px;
+        }
+
+        /* Huy hiệu Giới tính */
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .badge-male { background-color: #dbeafe; color: #1e40af; }
+        .badge-female { background-color: #fce7f3; color: #be185d; }
+
+        /* Nút Sửa trong bảng */
+        .action-btn {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Quản lý Nhân viên (Lab 7)</h2>
+        
+        <!-- Form Nhập liệu -->
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id">ID Nhân viên</label>
+                <input type="text" id="id" class="form-control" placeholder="Nhập ID...">
+            </div>
+            
+            <div class="form-group">
+                <label for="name">Họ và tên</label>
+                <input type="text" id="name" class="form-control" placeholder="Nhập tên...">
+            </div>
+            
+            <div class="form-group">
+                <label>Giới tính</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" id="male" name="gender" checked> Nam
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" id="female" name="gender"> Nữ
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="salary">Mức lương ($)</label>
+                <input type="number" id="salary" class="form-control" placeholder="Nhập lương...">
+            </div>
+        </div>
+
+        <!-- Các nút thao tác -->
+        <div class="btn-group">
+            <button class="btn btn-create" onclick="ctrl.create()"><span>+</span> Create</button>
+            <button class="btn btn-update" onclick="ctrl.update()"><span>&#9998;</span> Update</button>
+            <button class="btn btn-delete" onclick="ctrl.delete()"><span>&#128465;</span> Delete</button>
+            <button class="btn btn-reset" onclick="ctrl.reset()"><span>&#8634;</span> Reset</button>
+        </div>
+
+        <!-- Bảng Dữ liệu -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Salary</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        var ctrl = {
+            // URL trỏ đến EmployeeRestServlet
+            url: "employees",
+
+            // Đưa dữ liệu json lên form
+            setForm: function(employee) {
+                document.getElementById("id").value = employee.id;
+                document.getElementById("name").value = employee.name;
+                document.getElementById("salary").value = employee.salary;
+                document.getElementById("male").checked = employee.gender;
+                document.getElementById("female").checked = !employee.gender;
+            },
+
+            // Lấy dữ liệu từ form tạo thành đối tượng json
+            getForm: function() {
+                return {
+                    id: document.getElementById("id").value,
+                    name: document.getElementById("name").value,
+                    salary: parseFloat(document.getElementById("salary").value),
+                    gender: document.getElementById("male").checked
+                };
+            },
+
+            // Đổ mảng dữ liệu vào bảng
+            fillToTable: function(employees) {
+                let tbody = document.getElementById("list");
+                tbody.innerHTML = "";
+                employees.forEach(emp => {
+                    // Cập nhật lại HTML của từng hàng (tr) để ăn theo CSS mới
+                    let tr = `<tr>
+                        <td>${emp.id}</td>
+                        <td><strong>${emp.name}</strong></td>
+                        <td>
+                            <span class="badge ${emp.gender ? 'badge-male' : 'badge-female'}">
+                                ${emp.gender ? 'Male' : 'Female'}
+                            </span>
+                        </td>
+                        <td>$${emp.salary}</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn" onclick="ctrl.edit('${emp.id}')">Edit</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += tr;
+                });
+            },
+
+            // GET toàn bộ dữ liệu
+            loadAll: function() {
+                fetch(this.url)
+                    .then(res => res.json())
+                    .then(data => this.fillToTable(data))
+                    .catch(error => console.log("Lỗi hoặc chưa có API:", error));
+            },
+
+            // POST thêm mới
+            create: function() {
+                let data = this.getForm();
+                fetch(this.url, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {'Content-Type': 'application/json'}
+                }).then(res => res.json()).then(emp => {
+                    this.loadAll();
+                    this.reset();
+                });
+            },
+
+            // PUT cập nhật
+            update: function() {
+                let data = this.getForm();
+                fetch(this.url + "/" + data.id, {
+                    method: 'PUT',
+                    body: JSON.stringify(data),
+                    headers: {'Content-Type': 'application/json'}
+                }).then(res => {
+                    this.loadAll();
+                });
+            },
+
+            // DELETE xóa
+            delete: function() {
+                let data = this.getForm();
+                fetch(this.url + "/" + data.id, {
+                    method: 'DELETE'
+                }).then(res => {
+                    this.loadAll();
+                    this.reset();
+                });
+            },
+
+            // Xóa trắng form
+            reset: function() {
+                this.setForm({id: "", name: "", salary: "", gender: true});
+                document.getElementById("id").focus();
+            },
+
+            // Lấy thông tin 1 nhân viên đưa lên form để sửa
+            edit: function(id) {
+                fetch(this.url + "/" + id)
+                    .then(res => res.json())
+                    .then(emp => {
+                        this.setForm(emp);
+                    });
+            }
+        }
+
+        // Tải dữ liệu lần đầu khi mở trang
+        ctrl.loadAll();
+    </script>
+</body>
+</html>
